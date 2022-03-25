@@ -52,3 +52,9 @@
 @import url(./blocks/popup/_form/_form.css);
 @import url(./blocks/popup/_image/_image.css);
 @import url(./blocks/popup/__field-wrapper/popup__field-wrapper.css);
+
+@import url(./blocks/authform/authform.css);
+@import url(./blocks/authform/__hint/authform__hint.css);
+@import url(./blocks/authform/__input/authform__input.css);
+@import url(./blocks/authform/__submit-button/authform__submit-button.css);
+@import url(./blocks/authform/__title/authform__title.css);

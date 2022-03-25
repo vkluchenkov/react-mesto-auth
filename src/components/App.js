@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { Main } from "./Main";
-import { PopupWithForm } from "./PopupWithForm";
 import { ImagePopup } from "./ImagePopup";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import { api } from "../utils/Api";
 import { EditProfilePopup } from "./EditProfilePopup";
 import { EditAvatarPopup } from "./EditAvatarPopup";
 import { AddPlacePopup } from "./AddPlacePopup";
+import { Login } from "./Login";
+import { Register } from "./Register";
 
 function App() {
   // States
@@ -96,6 +97,8 @@ function App() {
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <Header />
+      {/* <Register />
+      <Login /> */}
       <Main
         onAddPlace={handleAddPlaceClick}
         onEditAvatar={handleEditAvatarClick}
@@ -105,9 +108,6 @@ function App() {
         onCardDelete={handleCardDelete}
         onCardLike={handleCardLike}
       />
-      <p>
-        {5 + 5} * {5}
-      </p>
       <Footer />
       <EditProfilePopup
         isOpen={isEditProfilePopupOpen}
