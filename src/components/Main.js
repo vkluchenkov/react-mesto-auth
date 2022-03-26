@@ -1,6 +1,5 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
-import { api } from "../utils/Api";
 import { Card } from "./Card";
 
 export function Main({

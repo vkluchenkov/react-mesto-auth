@@ -10,7 +10,7 @@ import { EditAvatarPopup } from "./EditAvatarPopup";
 import { AddPlacePopup } from "./AddPlacePopup";
 import { Login } from "./Login";
 import { Register } from "./Register";
-import { BrowserRouter, Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { InfoPopup } from "./InfoPopup";
 
@@ -81,7 +81,7 @@ function App() {
       .deleteCard(card._id)
       .then(() => {
         setCards((state) => {
-          state.filter((c) => c._id !== card._id);
+          return state.filter((c) => c._id != card._id);
         });
       })
       .catch((err) => console.log(err));
@@ -105,7 +105,9 @@ function App() {
     api
       .patchMe(user)
       .then((res) => {
-        setCurrentUser(res);
+        setCurrentUser((state) => {
+          return { ...state, ...res };
+        });
         setIsEditProfilePopupOpen(false);
       })
       .catch((err) => console.log(err));
@@ -114,7 +116,9 @@ function App() {
     api
       .patchAvatar(avatar)
       .then((user) => {
-        setCurrentUser(user);
+        setCurrentUser((state) => {
+          return { ...state, ...user };
+        });
         setIsEditAvatarPopupOpen(false);
       })
       .catch((err) => console.log(err));
