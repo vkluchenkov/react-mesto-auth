@@ -3,6 +3,7 @@
   color: #ffffff;
   text-decoration: none;
   transition: opacity 0.3s;
+  padding-right: 27px;
 }
 
 .header__link:hover {

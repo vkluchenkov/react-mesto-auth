@@ -54,9 +54,12 @@ function App() {
   const handleEditProfileClick = () => setIsEditProfilePopupOpen(true);
   const handleAddPlaceClick = () => setIsAddPlacePopupOpen(true);
   const handleCardClick = (card) => setSelectedCard(card);
+
   const handleLogout = () => {
     localStorage.removeItem("jwt");
-    currentUser.isLoggedIn = false;
+    setCurrentUser((prev) => {
+      return { ...prev, isLoggedIn: false };
+    });
   };
 
   const handleCardLike = (card) => {

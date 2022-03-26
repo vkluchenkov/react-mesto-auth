@@ -14,6 +14,7 @@ export const Login = () => {
       .then((res) => {
         localStorage.setItem("jwt", res.token);
         currentUser.isLoggedIn = true;
+        currentUser.email = signinPayload.email;
         navigate("/");
       })
       .catch((error) => console.log(error));
