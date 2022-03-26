@@ -19,6 +19,8 @@ export const AuthForm = ({ onSubmit, title, buttonLabel, hint }) => {
       email,
       password,
     });
+    setEmail(null);
+    setPassword(null);
   };
 
   return (

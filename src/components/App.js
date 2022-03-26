@@ -10,14 +10,20 @@ import { EditAvatarPopup } from "./EditAvatarPopup";
 import { AddPlacePopup } from "./AddPlacePopup";
 import { Login } from "./Login";
 import { Register } from "./Register";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { InfoPopup } from "./InfoPopup";
 
 function App() {
+  // Hooks
+  const navigate = useNavigate();
+
   // States
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
+  const [isSuccessPopupOpen, setSuccessPopupOpen] = useState(false);
+  const [isErrorPopupOpen, setErrorPopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [cards, setCards] = useState([]);
@@ -34,7 +40,7 @@ function App() {
       .catch((error) => console.log(error));
   }, []);
 
-  // Returning user auth
+  //// Returning user auth
   useEffect(() => {
     const jwt = localStorage.getItem("jwt");
     if (jwt) {
@@ -89,6 +95,8 @@ function App() {
       setIsAddPlacePopupOpen(false);
       setIsEditAvatarPopupOpen(false);
       setIsEditProfilePopupOpen(false);
+      setErrorPopupOpen(false);
+      setSuccessPopupOpen(false);
       setSelectedCard(null);
     }
   };
@@ -120,31 +128,48 @@ function App() {
       })
       .catch((err) => console.log(err));
 
+  const handleRegistrationError = () => {
+    setErrorPopupOpen(true);
+  };
+
+  const handleRegistrationSuccess = () => {
+    setSuccessPopupOpen(true);
+  };
+
+  const handleSuccessPopupClose = (e) => {
+    closeAllPopups(e);
+    navigate("/sign-in");
+  };
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
-      <BrowserRouter>
-        <Header onLogoutClick={handleLogout} />
-        <Routes>
-          <Route path="/sign-in" element={<Login />} />
-          <Route path="/sign-up" element={<Register />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Main
-                  onAddPlace={handleAddPlaceClick}
-                  onEditAvatar={handleEditAvatarClick}
-                  onEditProfile={handleEditProfileClick}
-                  onCardClick={handleCardClick}
-                  cards={cards}
-                  onCardDelete={handleCardDelete}
-                  onCardLike={handleCardLike}
-                />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
+      <Header onLogoutClick={handleLogout} />
+      <Routes>
+        <Route path="/sign-in" element={<Login />} />
+        <Route
+          path="/sign-up"
+          element={
+            <Register onError={handleRegistrationError} onSuccess={handleRegistrationSuccess} />
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Main
+                onAddPlace={handleAddPlaceClick}
+                onEditAvatar={handleEditAvatarClick}
+                onEditProfile={handleEditProfileClick}
+                onCardClick={handleCardClick}
+                cards={cards}
+                onCardDelete={handleCardDelete}
+                onCardLike={handleCardLike}
+              />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+
       <Footer />
       <EditProfilePopup
         isOpen={isEditProfilePopupOpen}
@@ -165,6 +190,16 @@ function App() {
       />
 
       <ImagePopup onClose={closeAllPopups} card={selectedCard} />
+
+      <InfoPopup onClose={handleSuccessPopupClose} isOpen={isSuccessPopupOpen}>
+        <div className="popup__info-icon popup__info-icon_success"></div>
+        <h2 className="popup__info-title">Вы успешно зарегистрировались!</h2>
+      </InfoPopup>
+
+      <InfoPopup onClose={closeAllPopups} isOpen={isErrorPopupOpen}>
+        <div className="popup__info-icon popup__info-icon_error"></div>
+        <h2 className="popup__info-title">Что-то пошло не так! Попробуйте ещё раз.</h2>
+      </InfoPopup>
     </CurrentUserContext.Provider>
   );
 }
