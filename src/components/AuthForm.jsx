@@ -1,8 +1,8 @@
 import { useState } from "react";
 
 export const AuthForm = ({ onSubmit, title, buttonLabel, hint }) => {
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
+  const [email, setEmail] = useState(null);
+  const [password, setPassword] = useState(null);
 
   const handleChange = (e) => {
     if (e.target.name === "email") {
@@ -23,7 +23,7 @@ export const AuthForm = ({ onSubmit, title, buttonLabel, hint }) => {
 
   return (
     <main className="content">
-      <form className="authform">
+      <form className="authform" onSubmit={submitHandler}>
         <h1 className="authform__title">{title}</h1>
         <input
           type="email"

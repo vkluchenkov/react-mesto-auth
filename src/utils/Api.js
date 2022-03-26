@@ -5,6 +5,23 @@ class Api {
     this._resHandler = (res) => (res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`));
   }
 
+  // Auth
+  signup(singupPayload) {
+    return fetch(`${this._baseUrl}/signup`, {
+      method: "POST",
+      headers: this._headers,
+      body: JSON.stringify(singupPayload),
+    }).then((res) => this._resHandler(res));
+  }
+
+  signin(signinPayload) {
+    return fetch(`${this._baseUrl}/signin`, {
+      method: "POST",
+      headers: this._headers,
+      body: JSON.stringify(signinPayload),
+    }).then((res) => this._resHandler(res));
+  }
+
   // Returns array of cards
   getCards() {
     return fetch(`${this._baseUrl}/cards`, {
@@ -68,5 +85,13 @@ export const api = new Api({
   headers: {
     authorization: "1ce0766d-1d99-41e8-b2c1-6a564053af66",
     "Content-Type": "application/json",
+  },
+});
+
+export const authApi = new Api({
+  baseUrl: "https://auth.nomoreparties.co",
+  headers: {
+    "Content-Type": "application/json",
+    authorization: `Bearer ${localStorage.getItem("jwt")}`,
   },
 });

@@ -4,12 +4,14 @@ import { Footer } from "./Footer";
 import { Main } from "./Main";
 import { ImagePopup } from "./ImagePopup";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
-import { api } from "../utils/Api";
+import { api, authApi } from "../utils/Api";
 import { EditProfilePopup } from "./EditProfilePopup";
 import { EditAvatarPopup } from "./EditAvatarPopup";
 import { AddPlacePopup } from "./AddPlacePopup";
 import { Login } from "./Login";
 import { Register } from "./Register";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 function App() {
   // States
@@ -24,10 +26,27 @@ function App() {
   useEffect(() => {
     Promise.all([api.getMe(), api.getCards()])
       .then(([user, cards]) => {
-        setCurrentUser(user);
+        setCurrentUser((prev) => {
+          return { ...prev, ...user };
+        });
         setCards(cards);
       })
       .catch((error) => console.log(error));
+  }, []);
+
+  // Returning user auth
+  useEffect(() => {
+    const jwt = localStorage.getItem("jwt");
+    if (jwt) {
+      authApi
+        .getMe()
+        .then((res) => {
+          setCurrentUser((prev) => {
+            return { ...prev, ...res.data, isLoggedIn: true };
+          });
+        })
+        .catch((error) => console.log(error));
+    }
   }, []);
 
   // Handlers
@@ -35,6 +54,10 @@ function App() {
   const handleEditProfileClick = () => setIsEditProfilePopupOpen(true);
   const handleAddPlaceClick = () => setIsAddPlacePopupOpen(true);
   const handleCardClick = (card) => setSelectedCard(card);
+  const handleLogout = () => {
+    localStorage.removeItem("jwt");
+    currentUser.isLoggedIn = false;
+  };
 
   const handleCardLike = (card) => {
     const hasMyLike = card.likes.some((like) => like._id === currentUser._id);
@@ -49,7 +72,7 @@ function App() {
       .deleteCard(card._id)
       .then(() => {
         setCards((state) => {
-          state.filter((c) => c._id != card._id);
+          state.filter((c) => c._id !== card._id);
         });
       })
       .catch((err) => console.log(err));
@@ -96,18 +119,29 @@ function App() {
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
-      <Header />
-      {/* <Register />
-      <Login /> */}
-      <Main
-        onAddPlace={handleAddPlaceClick}
-        onEditAvatar={handleEditAvatarClick}
-        onEditProfile={handleEditProfileClick}
-        onCardClick={handleCardClick}
-        cards={cards}
-        onCardDelete={handleCardDelete}
-        onCardLike={handleCardLike}
-      />
+      <BrowserRouter>
+        <Header onLogoutClick={handleLogout} />
+        <Routes>
+          <Route path="/sign-in" element={<Login />} />
+          <Route path="/sign-up" element={<Register />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Main
+                  onAddPlace={handleAddPlaceClick}
+                  onEditAvatar={handleEditAvatarClick}
+                  onEditProfile={handleEditProfileClick}
+                  onCardClick={handleCardClick}
+                  cards={cards}
+                  onCardDelete={handleCardDelete}
+                  onCardLike={handleCardLike}
+                />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
       <Footer />
       <EditProfilePopup
         isOpen={isEditProfilePopupOpen}
