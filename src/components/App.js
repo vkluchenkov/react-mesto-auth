@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Header } from "./Header";
-import { Footer } from "./Footer";
-import { Main } from "./Main";
-import { ImagePopup } from "./ImagePopup";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
+
 import { api, authApi } from "../utils/Api";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { Header } from "./Header";
+import { Main } from "./Main";
+import { Login } from "./Login";
+import { Register } from "./Register";
+import { Footer } from "./Footer";
+
+import { ImagePopup } from "./ImagePopup";
 import { EditProfilePopup } from "./EditProfilePopup";
 import { EditAvatarPopup } from "./EditAvatarPopup";
 import { AddPlacePopup } from "./AddPlacePopup";
-import { Login } from "./Login";
-import { Register } from "./Register";
-import { Routes, Route, useNavigate } from "react-router-dom";
-import { ProtectedRoute } from "./ProtectedRoute";
 import { InfoPopup } from "./InfoPopup";
 
 function App() {
@@ -25,20 +27,22 @@ function App() {
   const [isSuccessPopupOpen, setSuccessPopupOpen] = useState(false);
   const [isErrorPopupOpen, setErrorPopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState({ isLoggedIn: false });
   const [cards, setCards] = useState([]);
 
   // Effects
   useEffect(() => {
-    Promise.all([api.getMe(), api.getCards()])
-      .then(([user, cards]) => {
-        setCurrentUser((prev) => {
-          return { ...prev, ...user };
-        });
-        setCards(cards);
-      })
-      .catch((error) => console.log(error));
-  }, []);
+    if (currentUser.isLoggedIn) {
+      Promise.all([api.getMe(), api.getCards()])
+        .then(([user, cards]) => {
+          setCurrentUser((prev) => {
+            return { ...prev, ...user };
+          });
+          setCards(cards);
+        })
+        .catch((error) => console.log(error));
+    }
+  }, [currentUser.isLoggedIn]);
 
   //// Returning user auth
   useEffect(() => {
@@ -61,11 +65,27 @@ function App() {
   const handleAddPlaceClick = () => setIsAddPlacePopupOpen(true);
   const handleCardClick = (card) => setSelectedCard(card);
 
+  const handleError = () => setErrorPopupOpen(true);
+  const handleSuccess = () => setSuccessPopupOpen(true);
+
+  const handleRegistration = (signupPayload) =>
+    authApi.signup(signupPayload).then(handleSuccess).catch(handleError);
+
+  const handleLogin = (loginPayload) =>
+    authApi
+      .signin(loginPayload)
+      .then((res) => {
+        localStorage.setItem("jwt", res.token);
+        currentUser.isLoggedIn = true;
+        currentUser.email = loginPayload.email;
+        navigate("/");
+      })
+      .catch(handleError);
+
   const handleLogout = () => {
     localStorage.removeItem("jwt");
-    setCurrentUser((prev) => {
-      return { ...prev, isLoggedIn: false };
-    });
+    setCurrentUser({ isLoggedIn: false });
+    navigate("/sign-in");
   };
 
   const handleCardLike = (card) => {
@@ -76,14 +96,11 @@ function App() {
       .then((newCard) => setCards((state) => state.map((c) => (c._id === card._id ? newCard : c))))
       .catch((err) => console.log(err));
   };
+
   const handleCardDelete = (card) =>
     api
       .deleteCard(card._id)
-      .then(() => {
-        setCards((state) => {
-          return state.filter((c) => c._id != card._id);
-        });
-      })
+      .then(() => setCards((state) => state.filter((c) => c._id != card._id)))
       .catch((err) => console.log(err));
 
   const closeAllPopups = (e) => {
@@ -132,14 +149,6 @@ function App() {
       })
       .catch((err) => console.log(err));
 
-  const handleRegistrationError = () => {
-    setErrorPopupOpen(true);
-  };
-
-  const handleRegistrationSuccess = () => {
-    setSuccessPopupOpen(true);
-  };
-
   const handleSuccessPopupClose = (e) => {
     closeAllPopups(e);
     navigate("/sign-in");
@@ -149,13 +158,8 @@ function App() {
     <CurrentUserContext.Provider value={currentUser}>
       <Header onLogoutClick={handleLogout} />
       <Routes>
-        <Route path="/sign-in" element={<Login />} />
-        <Route
-          path="/sign-up"
-          element={
-            <Register onError={handleRegistrationError} onSuccess={handleRegistrationSuccess} />
-          }
-        />
+        <Route path="/sign-in" element={<Login onSubmit={handleLogin} />} />
+        <Route path="/sign-up" element={<Register onSubmit={handleRegistration} />} />
         <Route
           path="/"
           element={

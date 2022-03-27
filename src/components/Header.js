@@ -7,22 +7,20 @@ export const Header = ({ onLogoutClick }) => {
   const currentUser = useContext(CurrentUserContext);
   const [menuIsOpen, setMenuIsOpen] = useState(false);
 
-  const toggleMenu = () => {
-    setMenuIsOpen(!menuIsOpen);
-  };
+  const toggleMenu = () => setMenuIsOpen(!menuIsOpen);
 
-  const logout = () => {
+  const logoutMobile = () => {
     onLogoutClick();
     setMenuIsOpen(false);
   };
 
-  const Icons = () => {
-    if (menuIsOpen) {
-      return <button className="header__close-button" type="button" onClick={toggleMenu}></button>;
-    } else {
-      return <button className="header__menu-button" type="button" onClick={toggleMenu}></button>;
-    }
-  };
+  const Icons = () => (
+    <button
+      className={menuIsOpen ? "header__close-button" : "header__menu-button"}
+      type="button"
+      onClick={toggleMenu}
+    />
+  );
 
   return (
     <header className="header">
@@ -32,7 +30,7 @@ export const Header = ({ onLogoutClick }) => {
         }
       >
         <span className="header__info header__info_mobile">{currentUser?.email}</span>
-        <Link className="header__link header__link_mobile" onClick={logout} to="/sign-in">
+        <Link className="header__link header__link_mobile" onClick={logoutMobile} to="#">
           Выйти
         </Link>
       </div>
@@ -45,11 +43,7 @@ export const Header = ({ onLogoutClick }) => {
               <div className="header__info-wrapper">
                 <div className="header__info">
                   {currentUser?.email}
-                  <Link
-                    className="header__link header__link_logout"
-                    onClick={onLogoutClick}
-                    to="/sign-in"
-                  >
+                  <Link className="header__link header__link_logout" onClick={onLogoutClick} to="#">
                     Выйти
                   </Link>
                 </div>

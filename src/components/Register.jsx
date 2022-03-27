@@ -4,15 +4,8 @@ import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import { authApi } from "../utils/Api";
 import { AuthForm } from "./AuthForm";
 
-export const Register = ({ onError, onSuccess }) => {
+export const Register = ({ onSubmit }) => {
   const currentUser = useContext(CurrentUserContext);
-
-  const onSubmit = (signupPayload) => {
-    authApi
-      .signup(signupPayload)
-      .then(() => onSuccess())
-      .catch(() => onError());
-  };
 
   return !!currentUser?.isLoggedIn ? (
     <Navigate to="/" />

@@ -14,7 +14,7 @@ export function Main({
   const currentUser = useContext(CurrentUserContext);
 
   const section = () => {
-    if (cards.length > 0) {
+    if (cards.length) {
       return cards.map((card) => (
         <Card
           card={card}
